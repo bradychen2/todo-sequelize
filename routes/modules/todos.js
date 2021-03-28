@@ -15,8 +15,27 @@ router.post('/', (req, res) => {
 })
 
 // Get edit page
+router.get('/:id/edit', (req, res) => {
+  const id = req.params.id
+  const userId = req.user.id
 
-// Post edit
+  return Todo.findOne({ where: { userId, id } })
+    .then(todo => res.render('edit', { todo: todo.toJSON() }))
+})
+
+// Put edit
+router.put('/:id', (req, res) => {
+  const id = req.params.id
+  const userId = req.user.id
+
+  return Todo.findOne({ where: { userId, id } })
+    .then(todo => {
+      todo = Object.assign(todo, req.body)
+      return todo.save()
+    })
+    .then(() => res.redirect(`/todos/${id}`))
+    .catch(err => console.log(err))
+})
 
 // Delete
 
