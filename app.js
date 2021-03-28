@@ -2,6 +2,7 @@ const express = require('express')
 const exphbs = require('express-handlebars')
 const bodyParser = require('body-parser')
 const methodOverride = require('method-override')
+const flash = require('connect-flash')
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
@@ -16,6 +17,7 @@ app.engine('hbs', exphbs({ defaultLayout: 'main', extname: 'hbs' }))
 app.set('view engine', 'hbs')
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(methodOverride('_method'))
+app.use(flash())
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
@@ -27,7 +29,9 @@ usePassport(app)
 app.use((req, res, next) => {
   res.locals.isAuthenticated = req.isAuthenticated()
   res.locals.user = req.user
-  return next()
+  res.locals.warning_msg = req.flash('warning_msg')
+  res.locals.success_msg = req.flash('success_msg')
+  next()
 })
 
 app.use(routes)
