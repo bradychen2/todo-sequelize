@@ -35,6 +35,9 @@ router.put('/:id', (req, res) => {
 
   return Todo.findOne({ where: { UserId, id } })
     .then(todo => {
+      if (req.body.isDone) {
+        req.body.isDone = 1
+      }
       todo = Object.assign(todo, req.body)
       return todo.save()
     })
@@ -43,6 +46,16 @@ router.put('/:id', (req, res) => {
 })
 
 // Delete
+router.delete('/:id', (req, res) => {
+  const UserId = req.user.id
+  const id = req.params.id
+  return Todo.findOne({ where: { id, UserId } })
+    .then(todo => todo.destroy())
+    .then(() => {
+      res.redirect('/')
+    })
+    .catch(err => console.log(err))
+})
 
 // Get detail page
 router.get('/:id', (req, res) => {
@@ -51,6 +64,5 @@ router.get('/:id', (req, res) => {
     .then(todo => res.render('detail', { todo: todo.toJSON() }))
     .catch(err => console.log(err))
 })
-
 
 module.exports = router
