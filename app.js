@@ -3,8 +3,10 @@ const exphbs = require('express-handlebars')
 const bodyParser = require('body-parser')
 const session = require('express-session')
 const methodOverride = require('method-override')
-const db = require('./models')
 const bcrypt = require('bcryptjs')
+const passport = require('passport')
+const db = require('./models')
+const usePassport = require('./config/passport')
 
 const app = express()
 const PORT = 3000
@@ -15,14 +17,22 @@ app.engine('hbs', exphbs({ defaultLayout: 'main', extname: 'hbs' }))
 app.set('view engine', 'hbs')
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(methodOverride('_method'))
+app.use(session({
+  secret: 'ThisIsMySecret',
+  resave: false,
+  saveUninitialized: true
+}))
+
+usePassport(app)
 
 app.get('/users/login', (req, res) => {
   res.render('login')
 })
 
-app.post('/users/login', (req, res) => {
-  console.log('login')
-})
+app.post('/users/login', passport.authenticate('local', {
+  failureRedirect: '/users/login',
+  successRedirect: '/'
+}))
 
 app.get('/users/register', (req, res) => {
   res.render('register')
