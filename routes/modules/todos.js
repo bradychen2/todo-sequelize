@@ -10,25 +10,30 @@ router.get('/new', (req, res) => {
 
 // Post create
 router.post('/', (req, res) => {
-  const { name } = req.body
-  return Todo.create()
+  const name = req.body.name
+  return Todo.create({
+    name,
+    UserId: req.user.id
+  })
+    .then(() => res.redirect('/'))
+    .catch(err => console.log(err))
 })
 
 // Get edit page
 router.get('/:id/edit', (req, res) => {
   const id = req.params.id
-  const userId = req.user.id
+  const UserId = req.user.id
 
-  return Todo.findOne({ where: { userId, id } })
+  return Todo.findOne({ where: { UserId, id } })
     .then(todo => res.render('edit', { todo: todo.toJSON() }))
 })
 
 // Put edit
 router.put('/:id', (req, res) => {
   const id = req.params.id
-  const userId = req.user.id
+  const UserId = req.user.id
 
-  return Todo.findOne({ where: { userId, id } })
+  return Todo.findOne({ where: { UserId, id } })
     .then(todo => {
       todo = Object.assign(todo, req.body)
       return todo.save()
